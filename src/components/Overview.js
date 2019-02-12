@@ -36,7 +36,7 @@ class Overview extends Component {
             </tr>
           </table>
         </div>
-        <div className='textalign-l padding-l-std overview-info-block' style={{marginBottom: "120px"}}>
+        <div className='textalign-l padding-l-std overview-info-block' style={{marginBottom: "80px"}}>
           <p className='text-light'>
           449 Flora St.<br/>
           Dallas, Texas 75201</p>
