@@ -1,0 +1,36 @@
+@import 'src/colors.scss';
+
+.header-block {
+  position: relative;
+  width: 98vw;
+  height: 90px;
+}
+
+.indicator-container {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  margin-left: 50px;
+  width: 10px;
+  height: 70px;
+}
+
+.indicator-circle {
+  border: 1px solid $color-02;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  padding: 0px;
+}
+
+.active {
+  background: $color-05;
+  border: 1px solid $color-05;
+}
+
+.valid {
+  background: $color-02;
+}
