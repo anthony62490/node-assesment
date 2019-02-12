@@ -11,7 +11,10 @@ class App extends Component {
       <BrowserRouter>
       <div className="App">
         <header className="App-header">
-          {routes}
+          <div>
+            <div className="bg-std"/>
+            {routes}
+          </div>
         </header>
       </div>
       </BrowserRouter>

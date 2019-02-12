@@ -1,0 +1,33 @@
+@import 'src/colors.scss';
+
+.TESTBORDER {
+  border: 1px solid purple;
+}
+
+.center-logo {
+  margin-top: 30vh;
+}
+
+.textalign-l {
+  text-align: left;
+}
+
+.textalign-c {
+  text-align: center;
+}
+
+.padding-l-std {
+  padding-left: 5vw;
+}
+
+.img-logo-main {
+  width: 50vw;
+}
+
+.content-main {
+  padding-top: 5vh;
+  width: 100vw;
+  height: 100vh;
+  border: 3px solid $color-11;
+  box-sizing: border-box;
+}
