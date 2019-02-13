@@ -46,6 +46,40 @@ var DB = {
       color: "Blue",
       pic: "src/components/assets/car2.png"
     }
+  ],
+  music: [
+    {
+      id: 0,
+      vibe:"Blessed Silence"
+    },
+    {
+      id: 1,
+      vibe:"I Like Surprises"
+    },
+    {
+      id: 2,
+      vibe:"Vaporwave Beats"
+    },
+    {
+      id: 3,
+      vibe:"Retro Synthwave"
+    },
+    {
+      id: 4,
+      vibe:"Country Tunes"
+    },
+    {
+      id: 5,
+      vibe:"Kicked-Out Jams"
+    },
+    {
+      id: 6,
+      vibe:"Jammed-Out Kicks"
+    },
+    {
+      id: 7,
+      vibe:"Top of the Charts"
+    }
   ]
 };
 
@@ -63,7 +97,7 @@ function retrieveDBObjByID(id, searchType){
   
   let searchResults = DB[searchType].filter((e) => e.id === id);
   return searchResults[0];
-}
+};
 
 //
 // GET Endpoints
@@ -76,14 +110,12 @@ const  getTrip = (req, res, next) => {
     res.status(500).send('Internal Server Error');
   }
   else if(results) {
-    console.log('Found!');
     res.status(200).send(results);
   }
   else {
-    console.log('Not Found!')
     res.status(404).send('Requested trip not found');
   }
-}
+};
 
 const  getDriver = (req, res, next) => {
   //check to see that DB has an entry for the supplied id
@@ -92,61 +124,109 @@ const  getDriver = (req, res, next) => {
     res.status(500).send('Internal Server Error');
   }
   else if(results) {
-    console.log('Found!');
     res.status(200).send(results);
   }
   else {
-    console.log('Not Found!')
     res.status(404).send('Requested driver not found');
   }
-}
+};
 
 const  getVehicle = (req, res, next) => {
   //check to see that the 'DB' has an entry for the supplied id
-  let results = retrieveDBObjByID(Number(req.params.id), "cars")
+  let results = retrieveDBObjByID(Number(req.params.id), "cars");
   if(results === -1) {
     res.status(500).send('Internal Server Error');
   }
   else if(results) {
-    console.log('Found!');
     res.status(200).send(results);
   }
   else {
-    console.log('Not Found!')
     res.status(404).send('Requested vehicle not found');
+  };
+};
+
+const getMusic = (req, res, next) => {
+  let results = retrieveDBObjByID(Number(req.params.id), "music");
+  if(results === -1) {
+    res.status(500).send('Internal Server Error');
   }
-}
+  else if(results) {
+    res.status(200).send(results);
+  }
+  else {
+    res.status(404).send('Requested jam not found');
+  };
+};
 
 const  getAllTrips = (req, res, next) => {
   res.status(200).send(DB.trips);
-}
+};
 
 const  getAllDrivers = (req, res, next) => {
   res.status(200).send(DB.drivers);
-}
+};
 
 const  getAllVehicles = (req, res, next) => {
     res.status(200).send(DB.cars);
-}
+};
+
+const  getAllMusic = (req, res, next) => {
+    res.status(200).send(DB.music);
+};
 
 //
-// PUT endpoints
+// POST endpoints
 //
 
 const  addTrip = (req, res, next) => {
+  //expects an object containing an
+  //eta:              String  24hour time of arrival
+  //start_location:   String  starting address obtained from Maps. Lines delimited by a '%'
+  //end_location:     String  destination address obtained from Maps. Lines delimited by a '%'
+  //payment:          String  Name of payment option,
+  //customer_note:    String,
+  //est_fare_low:     Integer estimated low fare,
+  //est_fare_high:    Integer estimated high fare,,
+  //assigned_driver:  Integer id of assigned driver,
+  //assigned_vehicle: Integer id of assigned vehicle,
+
+  let foundKeys = Object.keys(req.body);
+  let expectedKeys = [
+    'eta',
+    'start_location',
+    'end_location',
+    'payment',
+    'customer_note',
+    'est_fare_low',
+    'est_fare_high',
+    'assigned_driver',
+    'assigned_vehicle'];
+  
+  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
+  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
+  if(missingKeys.length) {
+    errorStr = missingKeys.join(', ');
+    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+  }
+
+
   console.log(req.body);
 }
 
 const  addDriver = (req, res, next) => {
-  console.log("EDIT!");
+  console.log(req.body);
 }
 
 const  addVehicle = (req, res, next) => {
-  console.log("EDIT!");
+  console.log(req.body);
+}
+
+const  addMusic = (req, res, next) => {
+  console.log(req.body);
 }
 
 //
-//
+// PUT endpoints
 //
 
 const  changeStuff = (req, res, next) => {
@@ -162,12 +242,15 @@ module.exports =
   getTrip,
   getDriver,
   getVehicle,
+  getMusic,
   getAllTrips,
   getAllDrivers,
   getAllVehicles,
+  getAllMusic,
   addTrip,
   addDriver,
   addVehicle,
+  addMusic,
   changeStuff,
   deleteStuff
 };
