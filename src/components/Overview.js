@@ -50,7 +50,7 @@ class Overview extends Component {
         <div className='btn-cancel-trip' style={{marginBottom: "20px"}}>
           <span>CANCEL TRIP</span>
         </div>
-        <Footer dest={"DFW Int'l Airport"} eta={"15:39"}/>
+        <Footer dest={"DFW Int'l Airport"} eta={"15:39"} page={1}/>
         <Link to={`/driver`} style={{ textDecoration: "none" }}>
           <button>Go To Driver</button>
         </Link>
