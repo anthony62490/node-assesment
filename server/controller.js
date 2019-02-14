@@ -84,7 +84,7 @@ var DB = {
   ]
 };
 
-//importing validation functions used by the POST and PUT enpoints
+//importing validation functions used by the POST and PUT endpoints
 const {
   validateTrip,
   validateDriver,
@@ -206,8 +206,8 @@ const addTrip = (req, res, next) => {
   }
   else if(tripObjValid.code === 200) {
   
-    //Data should be good. Add it to DB
-    let newId = DB.trips[DB.trips.length - 1].id + 1;
+    //Data should be good. Add it to DB. If the array is empty, add an id of 0
+    let newId = (DB.trips.length) ? (DB.trips[DB.trips.length - 1].id + 1) : 0;
     DB.trips.push({
       //assign new id one higher than last existing id
       id: newId,
@@ -240,8 +240,8 @@ const  addDriver = (req, res, next) => {
   }
   else if(driverObjValid.code === 200) {
 
-    //No errors. Data should be good. Add new driver to DB
-    let newId = DB.drivers[DB.drivers.length - 1].id + 1;
+    //No errors. Data should be good. Add new driver to DB. If the array is empty, add an id of 0
+    let newId = (DB.drivers.length) ? (DB.drivers[DB.drivers.length - 1].id + 1) : 0;
     DB.drivers.push({
         //assign new id one higher than last existing id
         id: newId,
@@ -266,8 +266,8 @@ const addVehicle = (req, res, next) => {
     return -1;
   }
   else if (vehicleObjValid.code === 200) {
-    //No errors. Data should be good. Add new vehicle to DB
-    let newId = DB.cars[DB.cars.length - 1].id + 1;
+    //No errors. Data should be good. Add new vehicle to DB. If the array is empty, add an id of 0
+    let newId = (DB.cars.length) ? (DB.cars[DB.cars.length - 1].id + 1) : 0;
     DB.cars.push({
       //assign new id one higher than last existing id
       id: newId,
@@ -294,8 +294,8 @@ const  addMusic = (req, res, next) => {
     return -1;
   }
   else if(musicObjValid.code === 200) {
-    //No errors. Data should be good. Add new music to DB
-    let newId = DB.music[DB.music.length - 1].id + 1;
+    //No errors. Data should be good. Add new music to DB. If the array is empty, add an id of 0
+    let newId = (DB.music.length) ? (DB.music[DB.music.length - 1].id + 1) : 0;
     DB.music.push({
         //assign new id one higher than last existing id
         id: newId,
@@ -445,16 +445,55 @@ const  editMusic = (req, res, next) => {
 //
 
 const  deleteTrip = (req, res, next) => {
-  console.log("D'ELIT!");
+  //check to see that supplied id exists in DB
+  let target_id = getIndexOfObj(parseInt(req.params.id), "trips");
+  if(target_id === -1) {
+    res.status(404).send('Requested trip id not found');
+    return -1;
+  }
+  else {
+    DB.trips.splice(target_id, 1);
+    res.status(200).send(`data for trip id ${req.params.id} successfully deleted`);
+  }
 };
+
 const  deleteDriver = (req, res, next) => {
-  console.log("D'ELIT!");
+  //check to see that supplied id exists in DB
+  let target_id = getIndexOfObj(parseInt(req.params.id), "drivers");
+  if(target_id === -1) {
+    res.status(404).send('Requested driver id not found');
+    return -1;
+  }
+  else {
+    DB.drivers.splice(target_id, 1);
+    res.status(200).send(`data for driver id ${req.params.id} successfully deleted`);
+  }
 };
+
 const  deleteVehicle = (req, res, next) => {
-  console.log("D'ELIT!");
+  //check to see that supplied id exists in DB
+  let target_id = getIndexOfObj(parseInt(req.params.id), "cars");
+  if(target_id === -1) {
+    res.status(404).send('Requested vehicle id not found');
+    return -1;
+  }
+  else {
+    DB.cars.splice(target_id, 1);
+    res.status(200).send(`data for vehicle id ${req.params.id} successfully deleted`);
+  }
 };
+
 const  deleteMusic = (req, res, next) => {
-  console.log("D'ELIT!");
+  //check to see that supplied id exists in DB
+  let target_id = getIndexOfObj(parseInt(req.params.id), "music");
+  if(target_id === -1) {
+    res.status(404).send('Requested music id not found');
+    return -1;
+  }
+  else {
+    DB.music.splice(target_id, 1);
+    res.status(200).send(`data for music id ${req.params.id} successfully deleted`);
+  }
 };
 
 module.exports = 

@@ -48,6 +48,9 @@ app.put('/api/driver/:id', editDriver);
 app.put('/api/vehicle/:id', editVehicle);
 app.put('/api/music/:id', editMusic);
 
-//app.delete('/api/delete/:id', deleteStuff);
+app.delete('/api/trip/:id', deleteTrip);
+app.delete('/api/driver/:id', deleteDriver);
+app.delete('/api/vehicle/:id', deleteVehicle);
+app.delete('/api/music/:id', deleteMusic);
 
 app.listen(port, () => console.log( `Listening for requests on port ${port}` ));
