@@ -102,10 +102,19 @@ function retrieveDBObjByID(id, searchType){
   if(!validStrings.includes(searchType)){
     //supplied search string was not valid. This indicates an internal server error, not one on the user's end
     return -1;
-  }
+  };
   
   let searchResults = DB[searchType].filter((e) => e.id === id);
   return searchResults[0];
+};
+
+function getIndexOfObj(target_id, searchType) {
+  for(let i = 0; i < DB[searchType].length; i++) {
+    if(DB[searchType][i].id === target_id) {
+      return i;
+    }
+  }
+  return -1;
 };
 
 //
@@ -246,7 +255,7 @@ const  addDriver = (req, res, next) => {
     //something went wrong
     console.log(`Error: validateDriver() returned code "${driverObjValid.code}" and message "${driverObjValid.message}"`);
   };
-}
+};
 
 const addVehicle = (req, res, next) => {
   //send received object to validation function. No callback function is necessary since DB is not checked
@@ -274,10 +283,10 @@ const addVehicle = (req, res, next) => {
     //something went wrong
     console.log(`Error: validateVehicle() returned code "${vehicleObjValid.code}" and message "${vehicleObjValid.message}"`);
   }
-}
+};
 
 const  addMusic = (req, res, next) => {
-  //send received object to validation function. No callback function is necessary since DB is not checked
+  //send received object to validation function
   let musicObjValid = validateMusic(req.body);
 
   if(musicObjValid.code !== 200) {
@@ -297,19 +306,156 @@ const  addMusic = (req, res, next) => {
     //something went wrong
     console.log(`Error: validateMusic() returned code "${musicObjValid.code}" and message "${musicObjValid.message}"`);
   }
-}
+};
 
 //
 // PUT endpoints
 //
 
-const  changeStuff = (req, res, next) => {
-  console.log("CHANGE!");
-}
+//all of the PUT endpoints are very similar to the POST ones except that PUT also requires an id number in params
+const  editTrip = (req, res, next) => {
+  //check to see that supplied id exists in DB
+  let destination_id = getIndexOfObj(parseInt(req.params.id), "trips");
+  if(destination_id === -1){
+    res.status(404).send('Requested trip id not found');
+    return -1;
+  }
+  //send received object to validation function. Pass in a callback function that will let it have access to DB
+  let tripObjValid = validateTrip(req.body, retrieveDBObjByID);
 
-const  deleteStuff = (req, res, next) => {
+  if(tripObjValid.code !== 200) {
+    res.status(tripObjValid.code).send(tripObjValid.message);
+    return -1;
+  }
+  else if(tripObjValid.code === 200) {
+    //Data should be good. Replace the data at the given index
+    DB.trips[destination_id] = {
+      id: parseInt(req.params.id),
+      eta: req.body.eta,
+      start_location: req.body.start_location,
+      end_location: req.body.end_location,
+      payment: req.body.payment,
+      customer_note: req.body.customer_note,
+      est_fare_low: req.body.est_fare_high,
+      est_fare_high: req.body.est_fare_low,
+      assigned_driver: req.body.assigned_driver,
+      assigned_vehicle: req.body.assigned_vehicle,
+      requested_music: req.body.requested_music
+    };
+    res.status(200).send(`data for trip id ${req.params.id} successfully changed`);
+  }
+  else {
+    //something went wrong
+    console.log(`Error: validateTrip() returned code "${tripObjValid.code}" and message "${tripObjValid.message}"`);
+  };
+};
+
+const  editDriver = (req, res, next) => {
+  //check to see that supplied id exists in DB
+  let destination_id = getIndexOfObj(parseInt(req.params.id), "drivers");
+  if(destination_id === -1){
+    res.status(404).send('Requested driver id not found');
+    return -1;
+  }
+  //send received object to validation function
+  let driverObjValid = validateDriver(req.body);
+
+  if(driverObjValid.code !== 200) {
+    res.status(driverObjValid.code).send(driverObjValid.message);
+    return -1;
+  }
+  else if(driverObjValid.code === 200) {
+    //Data should be good. Replace the data at the given index
+    DB.drivers[destination_id] = {
+      id: parseInt(req.params.id),
+      name: req.body.name,
+      profile_pic: req.body.profile_pic,
+      bio: req.body.bio
+    };
+    res.status(200).send(`data for driver id ${req.params.id} successfully changed`);
+  }
+  else {
+    //something went wrong
+    console.log(`Error: validateDriver() returned code "${driverObjValid.code}" and message "${driverObjValid.message}"`);
+  };
+};
+
+const  editVehicle = (req, res, next) => {
+  //check to see that supplied id exists in DB
+  let destination_id = getIndexOfObj(parseInt(req.params.id), "cars");
+  if(destination_id === -1) {
+    res.status(404).send('Requested vehicle id not found');
+    return -1;
+  }
+  //send received object to validation function
+  let vehicleObjValid = validateVehicle(req.body);
+
+  if(vehicleObjValid.code !== 200) {
+    res.status(vehicleObjValid.code).send(vehicleObjValid.message);
+    return -1;
+  }
+  else if(vehicleObjValid.code === 200) {
+    //Data should be good. Replace the data at the given index
+    DB.cars[destination_id] = {
+      id: parseInt(req.params.id),
+      name: req.body.name,
+      year: req.body.year,
+      make: req.body.make,
+      model: req.body.model,
+      color: req.body.color,
+      pic: req.body.pic
+    };
+    res.status(200).send(`data for vehicle id ${req.params.id} successfully changed`);
+  }
+  else {
+    //something went wrong
+    console.log(`Error: validateVehicle() returned code "${vehicleObjValid.code}" and message "${vehicleObjValid.message}"`);
+  };
+};
+
+const  editMusic = (req, res, next) => {
+  //check to see that supplied id exists in DB
+  let destination_id = getIndexOfObj(parseInt(req.params.id), "music");
+  if(destination_id === -1) {
+    res.status(404).send('Requested vehicle id not found');
+    return -1;
+  }
+  //send received object to validation function. No callback function is necessary since DB is not checked
+  let musicObjValid = validateMusic(req.body);
+
+  if(musicObjValid.code !== 200) {
+    res.status(musicObjValid.code).send(musicObjValid.message);
+    return -1;
+  }
+  else if(musicObjValid.code === 200) {
+    //Data should be good. Replace the data at the given index
+    DB.music[destination_id] = {
+      id: parseInt(req.params.id),
+      vibe: req.body.vibe
+    };
+    res.status(200).send(`data for music id ${req.params.id} successfully changed`);
+  } else {
+    //something went wrong
+    console.log(`Error: validateMusic() returned code "${musicObjValid.code}" and message "${musicObjValid.message}"`);
+  };
+};
+
+//
+// DELETE endpoints
+//
+
+const  deleteTrip = (req, res, next) => {
   console.log("D'ELIT!");
-}
+};
+const  deleteDriver = (req, res, next) => {
+  console.log("D'ELIT!");
+};
+const  deleteVehicle = (req, res, next) => {
+  console.log("D'ELIT!");
+};
+const  deleteMusic = (req, res, next) => {
+  console.log("D'ELIT!");
+};
 
 module.exports = 
 {
@@ -325,7 +471,13 @@ module.exports =
   addDriver,
   addVehicle,
   addMusic,
-  changeStuff,
-  deleteStuff,
+  editTrip,
+  editDriver,
+  editVehicle,
+  editMusic,
+  deleteTrip,
+  deleteDriver,
+  deleteVehicle,
+  deleteMusic,
   retrieveDBObjByID
 };

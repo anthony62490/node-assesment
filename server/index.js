@@ -16,8 +16,14 @@ const {
   addDriver,
   addVehicle,
   addMusic,
-  changeStuff,
-  deleteStuff
+  editTrip,
+  editDriver,
+  editVehicle,
+  editMusic,
+  deleteTrip,
+  deleteDriver,
+  deleteVehicle,
+  deleteMusic
 } = require('./controller')
 
 app.use(json());
@@ -37,7 +43,10 @@ app.post('/api/driver', addDriver);
 app.post('/api/vehicle', addVehicle);
 app.post('/api/music', addMusic);
 
-//app.put('/api/change/:id', changeStuff);
+app.put('/api/trip/:id', editTrip);
+app.put('/api/driver/:id', editDriver);
+app.put('/api/vehicle/:id', editVehicle);
+app.put('/api/music/:id', editMusic);
 
 //app.delete('/api/delete/:id', deleteStuff);
 

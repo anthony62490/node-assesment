@@ -1,9 +1,6 @@
 //the other controller got very messy with input validation code, so I moved all of that here to keep it all in one place
 
-const validateTrip = (
-  objToValidate,
-  retrieveDBObjByID = require("./controller")
-) => {
+const validateTrip = (objToValidate, retrieveDBObjByID = require("./controller")) => {
   //expects an object containing an
   //eta:              String  24hour time of arrival
   //start_location:   String  starting address obtained from Maps. Lines delimited by a '%'
@@ -50,13 +47,8 @@ const validateTrip = (
     };
   }
   //checking that addresses match required format
-  if (
-    /[a-zA-Z0-9\s.',]+[%][a-zA-Z0-9\s.',]+/.test(
-      objToValidate.start_location
-    ) === false ||
-    /[a-zA-Z0-9\s.',]+[%][a-zA-Z0-9\s.',]+/.test(objToValidate.end_location) ===
-      false
-  ) {
+  if (/[a-zA-Z0-9\s.',]+[%][a-zA-Z0-9\s.',]+/.test(objToValidate.start_location) === false ||
+      /[a-zA-Z0-9\s.',]+[%][a-zA-Z0-9\s.',]+/.test(objToValidate.end_location) === false) {
     //this probably doesn't work for a large number of cases, but I figure that accurate error handling is beyond the scope of the project
     return {
       code: 400,
@@ -65,10 +57,8 @@ const validateTrip = (
     };
   }
   //checking that estimated fares are integers and that they are in the right order
-  if (
-    !Number.isInteger(objToValidate.est_fare_low) ||
-    !Number.isInteger(objToValidate.est_fare_high)
-  ) {
+  if (!Number.isInteger(objToValidate.est_fare_low) ||
+      !Number.isInteger(objToValidate.est_fare_high)) {
     return {
       code: 400,
       message: "Malformed fare estimations. Fares must be integers"
@@ -81,30 +71,24 @@ const validateTrip = (
     };
   }
   //checking that assigned driver exists
-  if (
-    !Number.isInteger(objToValidate.assigned_driver) ||
-    !retrieveDBObjByID(Number(objToValidate.assigned_driver), "drivers")
-  ) {
+  if (!Number.isInteger(objToValidate.assigned_driver) ||
+      !retrieveDBObjByID(Number(objToValidate.assigned_driver), "drivers")) {
     return {
       code: 404,
       message: "Requested driver id not found"
     };
   }
   //checking that assigned vehicle exists
-  if (
-    !Number.isInteger(objToValidate.assigned_vehicle) ||
-    !retrieveDBObjByID(Number(objToValidate.assigned_vehicle), "cars")
-  ) {
+  if (!Number.isInteger(objToValidate.assigned_vehicle) ||
+      !retrieveDBObjByID(Number(objToValidate.assigned_vehicle), "cars")) {
     return {
       code: 404,
       message: "Requested vehicle id not found"
     };
   }
   //checking that music exists
-  if (
-    !Number.isInteger(objToValidate.assigned_vehicle) ||
-    !retrieveDBObjByID(Number(objToValidate.requested_music), "music")
-  ) {
+  if (!Number.isInteger(objToValidate.assigned_vehicle) ||
+    !retrieveDBObjByID(Number(objToValidate.requested_music), "music")) {
     return {
       code: 404,
       message: "Requested music id not found"
