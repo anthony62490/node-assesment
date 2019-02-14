@@ -272,18 +272,163 @@ const addTrip = (req, res, next) => {
       requested_music: req.body.requested_music
   });
   res.status(200).send(newId + '');
-}
+};
 
 const  addDriver = (req, res, next) => {
-  console.log(req.body);
+  //expects an object containing an
+  //name:         String
+  //profile_pic:  String  file path or URL to picture
+  //bio:          String
+
+  let foundKeys = Object.keys(req.body);
+  let expectedKeys = ['name', 'profile_pic', 'bio'];
+
+  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
+  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
+  if (missingKeys.length) {
+    errorStr = missingKeys.join(', ');
+    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+    return -1;
+  }
+
+  //checking that provided values match required format
+
+  //tests that name is string
+  if (typeof req.body.name !== 'string') {
+    res.status(400).send('name should be a string')
+    return -1;
+  };
+  //tests that profile_pic is a filepath
+  if ( /([a-zA-Z0-9-/_ ]+)\.(png|jpg|bmp)+/.test(req.body.profile_pic) === false ) {
+    res.status(400).send('profile_pic should be a filepath')
+    return -1;
+  };
+  //tests that bio is string
+  if (typeof req.body.profile_pic !== 'string') {
+    res.status(400).send('bio should be a string')
+    return -1;
+  };
+
+  //No errors. Data should be good. Add new driver to DB
+  let newId = DB.drivers[DB.drivers.length - 1].id + 1;
+  DB.drivers.push({
+      //assign new id one higher than last existing id
+      id: newId,
+      name: req.body.name,
+      profile_pic: req.body.profile_pic,
+      bio: req.body.bio
+  });
+  res.status(200).send(newId + '');
 }
 
 const  addVehicle = (req, res, next) => {
-  console.log(req.body);
+  //expects an object containing an
+  //name:         String
+  //year:         Integer 4 digits starting with 19/20
+  //make:         String
+  //model:        String
+  //color:        String
+  //pic:          String filename
+
+  let foundKeys = Object.keys(req.body);
+  let expectedKeys = [
+    'name',
+    'year',
+    'make',
+    'model',
+    'color',
+    'pic'
+  ];
+
+  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
+  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
+  if (missingKeys.length) {
+    errorStr = missingKeys.join(', ');
+    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+    return -1;
+  }
+
+  //checking that provided values match required format
+
+  //tests that name is string
+  if (typeof req.body.name !== 'string') {
+    res.status(400).send('name should be a string')
+    return -1;
+  };
+  //tests that year is an integer between 1900 and 2099
+  if (typeof req.body.year !== 'number'
+      || req.body.year <= 1900
+      || req.body.year >= 2099) {
+    res.status(400).send('year should be an integer between 1900 and 2099')
+    return -1;
+  };
+  //tests that make is string
+  if (typeof req.body.make !== 'string') {
+    res.status(400).send('make should be a string')
+    return -1;
+  };
+  //tests that model is string
+  if (typeof req.body.model !== 'string') {
+    res.status(400).send('model should be a string')
+    return -1;
+  };
+  //tests that color is string
+  if (typeof req.body.color !== 'string') {
+    res.status(400).send('color should be a string')
+    return -1;
+  };
+  //tests that profile_pic is a filepath
+  if ( /([a-zA-Z0-9-/_ ]+)\.(png|jpg|bmp)+/.test(req.body.pic) === false ) {
+    res.status(400).send('pic should be a filepath')
+    return -1;
+  };
+
+  //No errors. Data should be good. Add new vehicle to DB
+  let newId = DB.cars[DB.cars.length - 1].id + 1;
+  DB.cars.push({
+      //assign new id one higher than last existing id
+      id: newId,
+      name: req.body.name,
+      year: req.body.year,
+      make: req.body.make,
+      model: req.body.model,
+      color: req.body.color,
+      pic: req.body.pic
+  });
+  res.status(200).send(newId + '');
 }
 
 const  addMusic = (req, res, next) => {
-  console.log(req.body);
+  //expects an object containing an
+  //vibe:  String
+
+  let foundKeys = Object.keys(req.body);
+  let expectedKeys = ['vibe'];
+
+  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
+  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
+  if (missingKeys.length) {
+    errorStr = missingKeys.join(', ');
+    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+    return -1;
+  }
+
+  //checking that provided values match required format
+
+  //tests that vibe is string
+  if (typeof req.body.vibe !== 'string') {
+    res.status(400).send('vibe should be a string')
+    return -1;
+  };
+
+  //No errors. Data should be good. Add new vehicle to DB
+  let newId = DB.music[DB.music.length - 1].id + 1;
+  DB.music.push({
+      //assign new id one higher than last existing id
+      id: newId,
+      vibe: req.body.vibe
+  });
+  res.status(200).send(newId + '');
 }
 
 //
