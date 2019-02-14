@@ -135,7 +135,7 @@ const validateDriver = objToValidate => {
   ) {
     return {
       code: 400,
-      message: "profile_pic should be a filepath"
+      message: "profile_pic should be a filepath ending in png, jpg or bmp"
     };
   }
   //tests that bio is string
@@ -218,7 +218,7 @@ const validateVehicle = objToValidate => {
   if (/([a-zA-Z0-9-/_ ]+)\.(png|jpg|bmp)+/.test(objToValidate.pic) === false) {
     return {
       code: 400,
-      message: "pic should be a filepath"
+      message: "pic should be a filepath ending in png, jpg or bmp"
     };
   }
   return {
