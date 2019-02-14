@@ -84,6 +84,14 @@ var DB = {
   ]
 };
 
+//importing validation functions used by the POST and PUT enpoints
+const {
+  validateTrip,
+  validateDriver,
+  validateVehicle,
+  validateMusic
+} = require('./validation_controller')
+
 function retrieveDBObjByID(id, searchType){
   //pass in an integer value and a string. The function will search DB for the appropriate object from the array matching the string and with an id matching the integer
   //The string should only be one of the values contained in DB's top layer. Anything else should return an error
@@ -180,84 +188,18 @@ const  getAllMusic = (req, res, next) => {
 //
 
 const addTrip = (req, res, next) => {
-  //expects an object containing an
-  //eta:              String  24hour time of arrival
-  //start_location:   String  starting address obtained from Maps. Lines delimited by a '%'
-  //end_location:     String  destination address obtained from Maps. Lines delimited by a '%'
-  //payment:          String  Name of payment option,
-  //customer_note:    String,
-  //est_fare_low:     Integer estimated low fare,
-  //est_fare_high:    Integer estimated high fare,,
-  //assigned_driver:  Integer id of assigned driver,
-  //assigned_vehicle: Integer id of assigned vehicle,
-  //requested_music:  Integer id of requested music
+  //send received object to validation function. Pass in a callback function that will let it have access to DB
+  let tripObjValid = validateTrip(req.body, retrieveDBObjByID);
 
-  let foundKeys = Object.keys(req.body);
-  let expectedKeys = [
-    'eta',
-    'start_location',
-    'end_location',
-    'payment',
-    'customer_note',
-    'est_fare_low',
-    'est_fare_high',
-    'assigned_driver',
-    'assigned_vehicle',
-    'requested_music'];
-
-  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
-  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
-  if (missingKeys.length) {
-    errorStr = missingKeys.join(', ');
-    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+  if(tripObjValid.code !== 200) {
+    res.status(tripObjValid.code).send(tripObjValid.message);
     return -1;
   }
-
-  //checking that provided values match required format
-
-  //tests that eta is a valid time in 24hour format
-  if (/([01]\d|2[0-3]):[0-5][0-9]/.test(req.body.eta) === false) {
-    res.status(400).send('Malformed ETA. ETA should be a 24hour time with leading zeroes')
-    return -1;
-  };
-  //checking that addresses match required format
-  if (/[a-zA-Z0-9\s.',]+[%][a-zA-Z0-9\s.',]+/.test(req.body.start_location) === false ||
-    /[a-zA-Z0-9\s.',]+[%][a-zA-Z0-9\s.',]+/.test(req.body.end_location) === false) {
-    //this probably doesn't work for a large number of cases, but I figure that accurate error handling is beyond the scope of the project
-    res.status(400).send('Malformed Address. Address should be a string with lines delimited by "%"')
-    return -1;
-  };
-  //checking that estimated fares are integers and that they are in the right order
-  if (!Number.isInteger(req.body.est_fare_low) || !Number.isInteger(req.body.est_fare_high)) {
-    res.status(400).send('Malformed fare estimations. Fares must be integers')
-    return -1;
-  }
-  if (req.body.est_fare_high < req.body.est_fare_low) {
-    res.status(400).send('Bad fare estimations. Low fare must be the smaller value')
-    return -1;
-  }
-  //checking that assigned driver exists
-  if (!Number.isInteger(req.body.assigned_driver) ||
-    !retrieveDBObjByID(Number(req.body.assigned_driver), "drivers")) {
-    res.status(404).send('Requested driver id not found')
-    return -1;
-  }
-  //checking that assigned vehicle exists
-  if (!Number.isInteger(req.body.assigned_vehicle) ||
-    !retrieveDBObjByID(Number(req.body.assigned_vehicle), "cars")) {
-    res.status(404).send('Requested vehicle id not found')
-    return -1;
-  }
-  //checking that music exists
-  if (!Number.isInteger(req.body.assigned_vehicle) ||
-    !retrieveDBObjByID(Number(req.body.requested_music), "music")) {
-    res.status(404).send('Requested music id not found')
-    return -1;
-  }
-
-  //if there hasn't been a 40X error by now, then the data should be good. Add it to DB
-  let newId = DB.trips[DB.trips.length - 1].id + 1;
-  DB.trips.push({
+  else if(tripObjValid.code === 200) {
+  
+    //Data should be good. Add it to DB
+    let newId = DB.trips[DB.trips.length - 1].id + 1;
+    DB.trips.push({
       //assign new id one higher than last existing id
       id: newId,
       eta: req.body.eta,
@@ -270,122 +212,54 @@ const addTrip = (req, res, next) => {
       assigned_driver: req.body.assigned_driver,
       assigned_vehicle: req.body.assigned_vehicle,
       requested_music: req.body.requested_music
-  });
-  res.status(200).send(newId + '');
+    });
+    res.status(200).send(newId + '');
+  }
+  else {
+    //something went wrong
+    console.log(`Error: validateTrip() returned code "${tripObjValid.code}" and message "${tripObjValid.message}"`);
+  };
 };
 
 const  addDriver = (req, res, next) => {
-  //expects an object containing an
-  //name:         String
-  //profile_pic:  String  file path or URL to picture
-  //bio:          String
+  //send received object to validation function. No callback function is necessary since DB is not checked
+  let driverObjValid = validateDriver(req.body);
 
-  let foundKeys = Object.keys(req.body);
-  let expectedKeys = ['name', 'profile_pic', 'bio'];
-
-  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
-  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
-  if (missingKeys.length) {
-    errorStr = missingKeys.join(', ');
-    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+  if(driverObjValid.code !== 200) {
+    res.status(driverObjValid.code).send(driverObjValid.message);
     return -1;
   }
+  else if(driverObjValid.code === 200) {
 
-  //checking that provided values match required format
-
-  //tests that name is string
-  if (typeof req.body.name !== 'string') {
-    res.status(400).send('name should be a string')
-    return -1;
+    //No errors. Data should be good. Add new driver to DB
+    let newId = DB.drivers[DB.drivers.length - 1].id + 1;
+    DB.drivers.push({
+        //assign new id one higher than last existing id
+        id: newId,
+        name: req.body.name,
+        profile_pic: req.body.profile_pic,
+        bio: req.body.bio
+    });
+    res.status(200).send(newId + '');
+  }
+  else {
+    //something went wrong
+    console.log(`Error: validateDriver() returned code "${driverObjValid.code}" and message "${driverObjValid.message}"`);
   };
-  //tests that profile_pic is a filepath
-  if ( /([a-zA-Z0-9-/_ ]+)\.(png|jpg|bmp)+/.test(req.body.profile_pic) === false ) {
-    res.status(400).send('profile_pic should be a filepath')
-    return -1;
-  };
-  //tests that bio is string
-  if (typeof req.body.profile_pic !== 'string') {
-    res.status(400).send('bio should be a string')
-    return -1;
-  };
-
-  //No errors. Data should be good. Add new driver to DB
-  let newId = DB.drivers[DB.drivers.length - 1].id + 1;
-  DB.drivers.push({
-      //assign new id one higher than last existing id
-      id: newId,
-      name: req.body.name,
-      profile_pic: req.body.profile_pic,
-      bio: req.body.bio
-  });
-  res.status(200).send(newId + '');
 }
 
-const  addVehicle = (req, res, next) => {
-  //expects an object containing an
-  //name:         String
-  //year:         Integer 4 digits starting with 19/20
-  //make:         String
-  //model:        String
-  //color:        String
-  //pic:          String filename
+const addVehicle = (req, res, next) => {
+  //send received object to validation function. No callback function is necessary since DB is not checked
+  let vehicleObjValid = validateVehicle(req.body);
 
-  let foundKeys = Object.keys(req.body);
-  let expectedKeys = [
-    'name',
-    'year',
-    'make',
-    'model',
-    'color',
-    'pic'
-  ];
-
-  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
-  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
-  if (missingKeys.length) {
-    errorStr = missingKeys.join(', ');
-    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+  if (vehicleObjValid.code !== 200) {
+    res.status(vehicleObjValid.code).send(vehicleObjValid.message);
     return -1;
   }
-
-  //checking that provided values match required format
-
-  //tests that name is string
-  if (typeof req.body.name !== 'string') {
-    res.status(400).send('name should be a string')
-    return -1;
-  };
-  //tests that year is an integer between 1900 and 2099
-  if (typeof req.body.year !== 'number'
-      || req.body.year <= 1900
-      || req.body.year >= 2099) {
-    res.status(400).send('year should be an integer between 1900 and 2099')
-    return -1;
-  };
-  //tests that make is string
-  if (typeof req.body.make !== 'string') {
-    res.status(400).send('make should be a string')
-    return -1;
-  };
-  //tests that model is string
-  if (typeof req.body.model !== 'string') {
-    res.status(400).send('model should be a string')
-    return -1;
-  };
-  //tests that color is string
-  if (typeof req.body.color !== 'string') {
-    res.status(400).send('color should be a string')
-    return -1;
-  };
-  //tests that profile_pic is a filepath
-  if ( /([a-zA-Z0-9-/_ ]+)\.(png|jpg|bmp)+/.test(req.body.pic) === false ) {
-    res.status(400).send('pic should be a filepath')
-    return -1;
-  };
-
-  //No errors. Data should be good. Add new vehicle to DB
-  let newId = DB.cars[DB.cars.length - 1].id + 1;
-  DB.cars.push({
+  else if (vehicleObjValid.code === 200) {
+    //No errors. Data should be good. Add new vehicle to DB
+    let newId = DB.cars[DB.cars.length - 1].id + 1;
+    DB.cars.push({
       //assign new id one higher than last existing id
       id: newId,
       name: req.body.name,
@@ -394,41 +268,35 @@ const  addVehicle = (req, res, next) => {
       model: req.body.model,
       color: req.body.color,
       pic: req.body.pic
-  });
-  res.status(200).send(newId + '');
+    });
+    res.status(200).send(newId + '');
+  } else {
+    //something went wrong
+    console.log(`Error: validateVehicle() returned code "${vehicleObjValid.code}" and message "${vehicleObjValid.message}"`);
+  }
 }
 
 const  addMusic = (req, res, next) => {
-  //expects an object containing an
-  //vibe:  String
+  //send received object to validation function. No callback function is necessary since DB is not checked
+  let musicObjValid = validateMusic(req.body);
 
-  let foundKeys = Object.keys(req.body);
-  let expectedKeys = ['vibe'];
-
-  //checking that all expected keys are accounted for. missingKeys === [] if all keys are present
-  missingKeys = expectedKeys.filter((e) => !foundKeys.includes(e));
-  if (missingKeys.length) {
-    errorStr = missingKeys.join(', ');
-    res.status(400).send(`Bad Request. Missing values for ${errorStr}`);
+  if(musicObjValid.code !== 200) {
+    res.status(musicObjValid.code).send(musicObjValid.message);
     return -1;
   }
-
-  //checking that provided values match required format
-
-  //tests that vibe is string
-  if (typeof req.body.vibe !== 'string') {
-    res.status(400).send('vibe should be a string')
-    return -1;
-  };
-
-  //No errors. Data should be good. Add new vehicle to DB
-  let newId = DB.music[DB.music.length - 1].id + 1;
-  DB.music.push({
-      //assign new id one higher than last existing id
-      id: newId,
-      vibe: req.body.vibe
-  });
-  res.status(200).send(newId + '');
+  else if(musicObjValid.code === 200) {
+    //No errors. Data should be good. Add new music to DB
+    let newId = DB.music[DB.music.length - 1].id + 1;
+    DB.music.push({
+        //assign new id one higher than last existing id
+        id: newId,
+        vibe: req.body.vibe
+    });
+    res.status(200).send(newId + '');
+  } else {
+    //something went wrong
+    console.log(`Error: validateMusic() returned code "${musicObjValid.code}" and message "${musicObjValid.message}"`);
+  }
 }
 
 //
@@ -458,5 +326,6 @@ module.exports =
   addVehicle,
   addMusic,
   changeStuff,
-  deleteStuff
+  deleteStuff,
+  retrieveDBObjByID
 };
